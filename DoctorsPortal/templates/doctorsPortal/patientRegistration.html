@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet"
+            id="bootstrap-css">
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+            integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'doctorsPortal/signin.css' %}">
+        <title>DoctorsPortal-Signin</title>
+
+    </head>
+
+    <body>
+
+
+        <div class="modal" tabindex="-1" role="dialog" id="addPatientModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Patient</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-signin" id = "frmIdAddPatient">
+
+                            <input type="user name" id="IdStrPatientName" class="form-control" placeholder="Name"
+                                required="" autofocus=""><br>
+                            <input type="password" id="idIntPatientAge" class="form-control" placeholder="Age"
+                                required=""><br>
+                            <input type="password" id="idStrPatientMobile" class="form-control" placeholder="Mobile"
+                                required=""><br>
+                            <input type="password" id="idStrPatientPlace" class="form-control" placeholder="Place"
+                                required=""><br>
+                            <hr>
+                        </form>
+                        <div id="errorContainer" style="display:none;">
+                            <ul style="list-style-type:none;color:red;">
+
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="idSaveModalButton" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                
+            </div>
+
+            
+        </div>
+        <div class="container justify-content-md-center col-example">
+            <div class="row">
+                <div class="col">
+                    <button id="btnIdLogout" class="btn btn-secondary float-right">Logout</button>
+                </div>
+            </div>
+        </div>
+        <div class="container justify-content-md-center col-example">
+            <div class="row">
+                <div class="col">
+                    <div class="tableHead">Patient Details</div>
+                </div>
+                <div class="col">
+                    <button id="addPatientButtonId" class="btn btn-success float-right">Add Patient</button>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+        </div class="row">
+        <table class="table table-striped" style="width:70%; margin: auto;" id="tblIdPatientDetails">
+            <thead>
+                <tr>
+                    <th scope="col">Sl.No</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">Mobile</th>
+                    <th scope="col">Place</th>
+
+                </tr>
+            </thead>
+            <tbody id = "tbodyIdPatientDetailsData">
+              
+            </tbody>
+        </table>
+
+        </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+        </script>
+        <script type="text/javascript">
+            // A $( document ).ready() block.   
+            $(document).ready(function () {
+                fnGetAllPatientDetailsData();
+            });
+            //Add Patient
+            $('#addPatientButtonId').click(function () {
+                //clear error messages
+                $("#addPatientModal #errorContainer ul").html("");
+                $("#addPatientModal #errorContainer").hide();
+                document.getElementById('frmIdAddPatient').reset()
+                $('#addPatientModal').modal('show');
+            });
+            // Logout 
+             $('#btnIdLogout').click(function () {
+                //clear error messages
+                $("#addPatientModal #errorContainer ul").html("");
+                $("#addPatientModal #errorContainer").hide();
+                document.getElementById('frmIdAddPatient').reset()
+                $.ajax({
+                    type: 'POST',
+                    url: 'logout',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        dataType: 'json'
+                    },
+                    success: function (response) {
+                        if (response.strStatus == 'SUCCESS') {
+                            window.location.href = "signin";
+
+                        } else if (response.strStatus == 'ERROR') {
+
+                            $("#addPatientModal #errorContainer").html(response.strMessage)
+                            $("#addPatientModal #errorContainer").show();
+
+                        } else {
+                            $("#addPatientModal #errorContainer").html('Unknown Response')
+                            $("#addPatientModal #errorContainer").show();
+                        }
+
+                    },
+                    error: function (response) {
+                        $("#addPatientModal #errorContainer").html('Unknown Response')
+                        $("#addPatientModal #errorContainer").show();
+                    }
+                });
+            });
+
+
+            $("#idSaveModalButton").click(function (event) {
+                event.preventDefault();
+                //clear error messages
+                $("#addPatientModal #errorContainer ul").html("");
+                $("#addPatientModal #errorContainer").hide();
+                
+                var arrNewRegistrationData = {};
+                //fun for validation
+                var intIfValid = fnValidation();
+                if (!intIfValid) {
+                    $("#addPatientModal #errorContainer").show();
+                    return;
+                }
+
+                arrNewRegistrationData = {
+                    "strPatientname": $.trim($("#IdStrPatientName").val()),
+                    "intPatientAge": $.trim($("#idIntPatientAge").val()),
+                    "strPatientMobile": $.trim($("#idStrPatientMobile").val()),
+                    "strPlace": $.trim($("#idStrPatientPlace").val()),
+
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'addNewPatientRegistration',
+                    data: {
+                        jsnNewPatientRegistrationData: JSON.stringify(arrNewRegistrationData),
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        dataType: 'json'
+                    },
+                    success: function (response) {
+                        if (response.strStatus == 'SUCCESS') {
+                            alert("Patient Registrered successfully.");
+                            var arrPatientDetailsData = response.lstDetailsData;
+                            fnAddDataToTable(arrPatientDetailsData);
+                        } else if (response.strStatus == 'ERROR') {
+
+                            $("#addPatientModal #errorContainer").html(response.strMessage)
+                            $("#addPatientModal #errorContainer").show();
+
+                        } else {
+                            $("#addPatientModal #errorContainer").html('Unknown Response')
+                            $("#addPatientModal #errorContainer").show();
+                        }
+
+                    },
+                    error: function (response) {
+                        $("#addPatientModal #errorContainer").html('Unknown Response')
+                        $("#addPatientModal #errorContainer").show();
+                    }
+                });
+            });
+
+
+            function fnGetAllPatientDetailsData() {
+                $.ajax({
+                    type: 'POST',
+                    url: 'getAllPatientDetailsData',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        dataType: 'json'
+                    },
+                    success: function (response) {
+                        if (response.strStatus == 'SUCCESS') {
+                            // 
+                            var arrPatientDetailsData = response.lstDetailsData;
+                            fnAddDataToTable(arrPatientDetailsData);
+
+                        } else if (response.strStatus == 'ERROR') {
+
+                            $("#addPatientModal #errorContainer").html(response.strMessage)
+                            $("addPatientModal #errorContainer").show();
+
+                        } else {
+                            $("#addPatientModal #errorContainer").html('Unknown Response')
+                            $("#addPatientModal #errorContainer").show();
+                        }
+
+                    },
+                    error: function (response) {
+                        $("#addPatientModal #errorContainer").html('Unknown Response')
+                        $("#addPatientModal #errorContainer").show();
+                    }
+                });
+            }
+
+            function fnAddDataToTable(arrPatientDetailsData) {
+                $("#tbodyIdPatientDetailsData").empty();
+                strTableRow = ''
+                for(var intIndex = 0; intIndex < arrPatientDetailsData.length; intIndex++) {
+                    strTableRow += '<tr><td>'+(intIndex+1)+'</td><td>'+arrPatientDetailsData[intIndex].strPatientName+'</td><td>'+arrPatientDetailsData[intIndex].intPatientAge+'</td><td>'+arrPatientDetailsData[intIndex].intPatientMobile+'</td><td>'+arrPatientDetailsData[intIndex].intPatientPlace+'</td></tr>'
+
+                }
+            
+                $("#tbodyIdPatientDetailsData").append(strTableRow);
+            } 
+
+            function fnValidation(){
+                var intValid = 1;
+                if($.trim($("#IdStrPatientName").val())==''){
+                    $("#addPatientModal #errorContainer ul").append("<li class = 'error'><label>Name is Required</label></li>");       
+                    intValid = 0;
+                }
+                if($.trim($("#idIntPatientAge").val())==''){
+                    $("#addPatientModal #errorContainer ul").append("<li class = 'error'><label>Age is Required</label></li>");       
+                    intValid = 0;
+                }
+                if($.trim($("#idStrPatientMobile").val())==''){
+                    $("#addPatientModal #errorContainer ul").append("<li class = 'error'><label>Phone Number is Required</label></li>");       
+                    intValid = 0;
+                }
+                if($.trim($("#idStrPatientPlace").val())==''){
+                    $("#addPatientModal #errorContainer ul").append("<li class = 'error'><label>Place is Required</label></li>");       
+                    intValid = 0;
+                }
+            
+                return intValid;  
+            }
+        </script>
+    </body>
+
+</html>

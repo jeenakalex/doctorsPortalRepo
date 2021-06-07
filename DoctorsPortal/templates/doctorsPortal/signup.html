@@ -1,0 +1,145 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet"href = "{% static 'doctorsPortal/signin.css' %}">
+    <title>DoctorsPortal-Signin</title>
+
+</head>
+<body>
+    <div id="logreg-forms">
+        <form class="form-signin">
+            <h1 class="h3 mb-3 font-weight-normal" style="text-align: center">Registration</h1>
+
+            <label for="strUserName">Name</label><span style="color:#ff0000;">*</span>
+            <input type="user name" name="strUserName" id="idStrUserName" class="form-control" autofocus=""><br>
+            <label for="userAge">Age</label><span style="color:#ff0000;">*</span>
+            <input type="text" name = "userAge" id="idIntAge" class="form-control" required><br>
+            <label for="userEmail">Email</label><span style="color:#ff0000;">*</span>
+            <input type="text" name = "userEmail" id="idStrEmail" class="form-control"required><br>
+            <label for="userMobile">Mobile</label><span style="color:#ff0000;">*</span>
+            <input type="text" name = "userMobile" id="idStrMobile" class="form-control"  required><br>
+            <label for="userPassword">Password</label><span style="color:#ff0000;">*</span>
+            <input type="password" name = "userPassword" id="idStrPassword" class="form-control"  required><br>
+            <label for="userConfPassword">Confirm Password</label><span style="color:#ff0000;">*</span>
+            <input type="password" name = "userConfPassword" id="idStrConfirmPassword" class="form-control" required><br>
+            <div id="errorContainer" style="display:none;">
+                <ul style="list-style-type:none;color:red;">
+                    
+                </ul>
+            </div>
+            <button class="btn btn-success btn-block" type="submit" id="btnIdRegister"> Register</button>
+            <hr>
+            </form>
+            <br>
+            
+    </div>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+  
+
+        $("#btnIdRegister").click(function (event) {
+                event.preventDefault();
+                //clear error messages
+                $("#errorContainer ul").html("");
+                $("#errorContainer").hide();
+                //fun for validation
+                var arrNewRegistrationData = {};
+                var intIfValid = fnValidation();
+                if(!intIfValid){
+                    $("#errorContainer").show();
+                    return;
+                }
+                
+                arrNewRegistrationData = {
+                    "strUsername": $.trim($("#idStrUserName").val()),
+                    "intAge": $.trim($("#idIntAge").val()),
+                    "strEmail": $.trim($("#idStrEmail").val()),
+                    "strMobile": $.trim($("#idStrMobile").val()),
+                    "strPassword": $.trim($("#idStrPassword").val()),
+
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'addNewUserRegistration',
+                    data: {
+                        jsnNewRegistrationData: JSON.stringify(arrNewRegistrationData),
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        dataType: 'json'
+                    },
+                    success: function (response) {
+                        if(response.strStatus == 'SUCCESS'){
+                            alert("Sign up successfully.Lets move to Patient registration.")
+                            window.location.href = "patientRegistration"; // add new Patient if sign up success         
+                        }
+                        else if(response.strStatus == 'ERROR'){
+                            $("#errorContainer").html(response.strMessage)
+                            $("#errorContainer").show();
+                        }
+                        else{
+                            $("#errorContainer").html('Unknown Response')
+                            $("#errorContainer").show();
+                        }
+                    },
+                    error: function (response) {
+                        $("#errorContainer").html('Unknown Response')
+                        $("#errorContainer").show();
+                    }
+                });
+            });
+
+
+        
+        function fnValidation(){
+            var intValid = 1;
+            if($.trim($("#idStrUserName").val())==''){
+                $("#errorContainer ul").append("<li class = 'error'><label>Name is Required</label></li>");       
+                intValid = 0;
+            }
+            if($.trim($("#idIntAge").val())==''){
+            
+                $("#errorContainer ul").append("<li class = 'error'><label>Age is Required</label></li>");       
+                intValid = 0;
+            }
+            if($.trim($("#idStrEmail").val())==''){
+                $("#errorContainer ul").append("<li class = 'error'><label>Email is Required</label></li>");       
+                intValid = 0;
+            }
+            if($.trim($("#idStrMobile").val())==''){
+                
+                $("#errorContainer ul").append("<li class = 'error'><label>Phone Number is Required</label></li>");       
+                intValid = 0;
+            }
+            if($.trim($("#idStrPassword").val())==''){
+                $("#errorContainer ul").append("<li class = 'error'><label>Password is Required</label></li>");       
+                intValid = 0;
+            }
+            if($.trim($("#idStrConfirmPassword").val())==''){
+                $("#errorContainer ul").append("<li class = 'error'><label>Confirm Password is Required</label></li>");    
+                intValid = 0;
+            }
+            if($.trim($("#idStrPassword").val()) != $.trim($("#idStrConfirmPassword").val())){
+                $("#errorContainer ul").append("<li class = 'error'><label>Confirm Password mismatch</label></li>");    
+                intValid = 0;
+            }
+            
+        return intValid;  
+        }
+    </script>
+</body>
+</html>
